@@ -1,0 +1,111 @@
+/* Design tokens from «Г · Плёнка» — the only place raw design values live (docs/07). */
+@import "tailwindcss";
+
+@theme {
+  /* Color — dark film palette */
+  --color-ground: #0D0A11;
+  --color-surface: #1E1726;
+  --color-surface-hover: #2A2133;
+  --color-line: #2A2133;
+  --color-ink: #F1EAF8;
+  --color-ink-soft: #E3D9EE;
+  --color-muted: #A699B5;
+  --color-accent: #C9A7FF;
+  --color-accent-hover: #E8DAFF;
+  --color-on-accent: #170F20;
+  --color-danger: #FF9FC8;
+
+  /* Typography */
+  --text-body: 17px;
+  --text-hero: 96px;   --text-hero--line-height: 0.92; --text-hero--letter-spacing: -0.03em;
+  --text-h1: 64px;     --text-h1--line-height: 1;      --text-h1--letter-spacing: -0.03em;
+  --text-feed: 60px;   --text-feed--line-height: 0.95; --text-feed--letter-spacing: -0.03em;
+  --text-h2: 44px;     --text-h2--line-height: 1.2;    --text-h2--letter-spacing: -0.02em;
+  --text-h3: 36px;     --text-h3--line-height: 1.2;
+
+  /* Radius */
+  --radius-frame: 4px;
+  --radius-strip: 8px;
+  --radius-btn: 10px;
+  --radius-switch: 6px;
+
+  /* Layout */
+  --spacing-gutter: 64px;
+  --spacing-section: 112px;
+  --container-page: 1440px;
+
+  /* Motion */
+  --ease-film: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* A phone turned sideways (short and wide); the feed goes full screen there. */
+@custom-variant landscape-phone (@media (orientation: landscape) and (max-height: 500px));
+
+/* Height of the bottom band that holds the tab island (mirrors the header at the top). */
+:root { --tabbar-h: 88px; }
+
+/* Phones: same tokens, smaller values. Utilities read the variables, so components don't change. */
+@media (max-width: 767.98px) {
+  :root {
+    --tabbar-h: 72px;
+    --spacing-gutter: 16px;
+    --spacing-section: 64px;
+    --text-body: 16px;
+    --text-hero: 48px;
+    --text-h1: 40px;
+    --text-feed: 34px;
+    --text-h2: 28px;
+    --text-h3: 26px;
+  }
+}
+
+/* Jost comes from next/font and is exposed as --font-jost on <html>. */
+@theme inline {
+  --font-sans: var(--font-jost), system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-ground text-ink font-sans;
+    font-size: var(--text-body);
+    line-height: 1.5;
+  }
+  ::selection { background: var(--color-accent); color: var(--color-ground); }
+  a, button { @apply cursor-pointer; }
+  a { color: var(--color-accent); }
+  a:hover { color: var(--color-accent-hover); }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+}
+
+@layer components {
+  /* Tab icons are PNG masks so they take the tab's text colour. */
+  .mask-icon {
+    display: block; flex: none; background-color: currentColor;
+    mask-position: center; mask-size: contain; mask-repeat: no-repeat;
+  }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* Reel: the ring turns on hover */
+  .reel .ring { transition: transform .8s var(--ease-film); }
+  .reel:hover .ring { transform: rotate(72deg); }
+
+  /* Feed: the new frame rolls in from below */
+  @keyframes roll { from { transform: translateY(80px); } to { transform: none; } }
+  .roll { animation: roll .5s var(--ease-film); }
+
+  /* «Поверните телефон»: the phone tips onto its side, holds, and comes back */
+  @keyframes rotate-phone {
+    0%, 18% { transform: rotate(0deg); }
+    42%, 72% { transform: rotate(-90deg); }
+    96%, 100% { transform: rotate(0deg); }
+  }
+  .rotate-phone { animation: rotate-phone 2.8s var(--ease-film) infinite; transform-origin: 50% 50%; }
+
+  /* Only Y here: the toast is centered with Tailwind's `translate` property, which adds to `transform`. */
+  @keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .toast-in { animation: toast-in .25s var(--ease-film); }
+}

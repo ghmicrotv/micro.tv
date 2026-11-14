@@ -1,0 +1,4 @@
+# API runtime data (SQLite database, uploaded avatars)
+apps/api/data/
+# API binary from `go build -o bin/api ./cmd/api`
+apps/api/bin/
