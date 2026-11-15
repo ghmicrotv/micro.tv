@@ -1,4 +1,5 @@
 // Thin typed client for the Go API (same origin, proxied by next.config.ts).
+export const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
 export type Art = { bg: string; ink: string; shape: string };
 
@@ -60,7 +61,10 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`/api/v1${path}`, { credentials: "same-origin", ...init });
+  const res = await fetch(`${API_ORIGIN}/api/v1${path}`, {
+    credentials: API_ORIGIN ? "include" : "same-origin",
+    ...init,
+  });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new ApiError(res.status, body?.error?.code ?? "http_error", body?.error?.message ?? res.statusText);

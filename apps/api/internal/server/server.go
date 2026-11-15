@@ -38,7 +38,21 @@ func (s *Server) Routes() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID, middleware.Logger, middleware.Recoverer)
 	r.Use(middleware.Timeout(15 * time.Second))
-
+r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if origin := r.Header.Get("Origin"); origin != "" {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Access-Control-Allow-Credentials", "true")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			}
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
 	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) })
 
 	r.Route("/api/v1", func(r chi.Router) {
@@ -115,7 +129,7 @@ func (s *Server) startDemoSession(w http.ResponseWriter, r *http.Request) (store
 		return u, err
 	}
 	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: token, Path: "/", Expires: expires,
-		HttpOnly: true, SameSite: http.SameSiteLaxMode})
+		HttpOnly: true, SameSite: http.SameSiteNoneMode, Secure: true})
 	http.SetCookie(w, &http.Cookie{Name: signedOutCookie, Value: "", Path: "/", MaxAge: -1})
 	return u, nil
 }
@@ -148,7 +162,7 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1, HttpOnly: true})
 	http.SetCookie(w, &http.Cookie{Name: signedOutCookie, Value: "1", Path: "/", MaxAge: int(sessionTTL.Seconds()),
-		SameSite: http.SameSiteLaxMode})
+		SameSite: http.SameSiteNoneMode, Secure: true})
 	w.WriteHeader(http.StatusNoContent)
 }
 
