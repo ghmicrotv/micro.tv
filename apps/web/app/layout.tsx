@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Jost } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { Header } from "@/components/Header";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TabBar } from "@/components/TabBar";
 import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
-const jost = Jost({
+const jost = Manrope({
   subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-jost",
